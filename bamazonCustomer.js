@@ -109,3 +109,20 @@ function newOrder(){
 };
 
 
+//functions to push the sales to the executive table
+function logSaleToDepartment(){
+	connection.query('SELECT * FROM departments WHERE DepartmentName = ?', [currentDepartment], function(err, res){
+		updateSales = res[0].TotalSales + amountOwed;
+		updateDepartmentTable();
+	})
+};
+
+function updateDepartmentTable(){
+		connection.query('UPDATE departments SET ? WHERE ?', [{
+		TotalSales: updateSales
+	},{
+		DepartmentName: currentDepartment
+	}], function(err, res){});
+};
+
+showProducts();
