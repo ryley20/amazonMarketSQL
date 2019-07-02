@@ -1,128 +1,74 @@
-
-var inquirer = require('inquirer');
-var mysql = require('mysql');
-
-var amountOwed;
-var currentDepartment;
-var updateSales;
+var mysql = require("mysql");
+var inquirer = require("inquirer");
+var Table = require("cli-table");
 
 var connection = mysql.createConnection({
-	host: 'localhost',
-	port: 3306,
-	user: 'root',
-	password: 'Souljaboy7',
-	database: 'Bamazon_db'
+	host:"localhost",
+	port:3306,
+	user:"root",
+	password:"Souljaboy7",
+	database:"bamazon"
 });
-
 
 connection.connect(function(err){
-	if (err) throw err;
-	console.log('connected as id: ' + connection.threadId)
+	if(err)throw err;
+	console.log("connected as id" + connection.threadId);
 });
 
-//FUNCTIONS
-//=============================================================================
-
-//Displays all items available in store and then calls the place order function
-function showProducts(){
-	connection.query('SELECT * FROM products', function(err, res){
-		if (err) throw err;
-		console.log('=================================================');
-		console.log('=================Items in Store==================');
-		console.log('=================================================');
-
-		for(i=0;i<res.length;i++){
-			console.log('Item ID:' + res[i].id + ' Product Name: ' + res[i].ProductName + ' Price: ' + '$' + res[i].Price + '(Quantity left: ' + res[i].StockQuantity + ')')
+var displayProducts = function(){
+	var query = "Select * FROM products";
+	connection.query(query, function(err, res){
+		if(err) throw err;
+		var displayTable = new Table ({
+			head: ["Item ID", "Product Name", "Catergory", "Price", "Quantity"],
+			colWidths: [10,25,25,10,14]
+		});
+		for(var i = 0; i < res.length; i++){
+			displayTable.push(
+				[res[i].item_id,res[i].product_name, res[i].department_name, res[i].price, res[i].stock_quantity]
+				);
 		}
-		console.log('=================================================');
-		placeOrder();
-		})
+		console.log(displayTable.toString());
+		purchasePrompt();
+	});
 }
 
-//Prompts the user to place an order, fulfills the order, and then calls the new order function
-function placeOrder(){
-	inquirer.prompt([{
-		name: 'selectId',
-		message: 'Please enter the ID of the product you wish to purchase',
-		validate: function(value){
-			var valid = value.match(/^[0-9]+$/)
-			if(valid){
-				return true
-			}
-				return 'Please enter a valid Product ID'
-		}
-	},{
-		name:'selectQuantity',
-		message: 'How many of this product would you like to order?',
-		validate: function(value){
-			var valid = value.match(/^[0-9]+$/)
-			if(valid){
-				return true
-			}
-				return 'Please enter a numerical value'
-		}
-	}]).then(function(answer){
-	connection.query('SELECT * FROM products WHERE id = ?', [answer.selectId], function(err, res){
-		if(answer.selectQuantity > res[0].StockQuantity){
-			console.log('Insufficient Quantity');
-			console.log('This order has been cancelled');
-			console.log('');
-			newOrder();
-		}
-		else{
-			amountOwed = res[0].Price * answer.selectQuantity;
-			currentDepartment = res[0].DepartmentName;
-			console.log('Thanks for your order');
-			console.log('You owe $' + amountOwed);
-			console.log('');
-			//update products table
-			connection.query('UPDATE products SET ? Where ?', [{
-				StockQuantity: res[0].StockQuantity - answer.selectQuantity
-			},{
-				id: answer.selectId
-			}], function(err, res){});
-			//update departments table
-			logSaleToDepartment();
-			newOrder();
-		}
-	})
+function purchasePrompt(){
+	inquirer.prompt([
+	{
+		name: "ID",
+		type: "input",
+		message:"Please enter Item ID you like to purhcase.",
+		filter:Number
+	},
+	{
+		name:"Quantity",
+		type:"input",
+		message:"How many items do you wish to purchase?",
+		filter:Number
+	},
 
-}, function(err, res){})
+ ]).then(function(answers){
+ 	var quantityNeeded = answers.Quantity;
+ 	var IDrequested = answers.ID;
+ 	purchaseOrder(IDrequested, quantityNeeded);
+ });
 };
 
+function purchaseOrder(ID, amtNeeded){
+	connection.query('Select * FROM products WHERE item_id = ' + ID, function(err,res){
+		if(err){console.log(err)};
+		if(amtNeeded <= res[0].stock_quantity){
+			var totalCost = res[0].price * amtNeeded;
+			console.log("Good news your order is in stock!");
+			console.log("Your total cost for " + amtNeeded + " " +res[0].product_name + " is " + totalCost + " Thank you!");
 
-//Allows the user to place a new order or end the connection
-function newOrder(){
-	inquirer.prompt([{
-		type: 'confirm',
-		name: 'choice',
-		message: 'Would you like to place another order?'
-	}]).then(function(answer){
-		if(answer.choice){
-			placeOrder();
-		}
-		else{
-			console.log('Thank you for shopping!');
-			connection.end();
-		}
-	})
+			connection.query("UPDATE products SET stock_quantity = stock_quantity - " + amtNeeded + "WHERE item_id = " + ID);
+		} else{
+			console.log("Insufficient quantity, sorry we do not have enough " + res[0].product_name + "to complete your order.");
+		};
+		displayProducts();
+	});
 };
 
-
-//functions to push the sales to the executive table
-function logSaleToDepartment(){
-	connection.query('SELECT * FROM departments WHERE DepartmentName = ?', [currentDepartment], function(err, res){
-		updateSales = res[0].TotalSales + amountOwed;
-		updateDepartmentTable();
-	})
-};
-
-function updateDepartmentTable(){
-		connection.query('UPDATE departments SET ? WHERE ?', [{
-		TotalSales: updateSales
-	},{
-		DepartmentName: currentDepartment
-	}], function(err, res){});
-};
-
-showProducts();
+displayProducts(); 

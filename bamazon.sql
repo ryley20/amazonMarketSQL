@@ -1,39 +1,28 @@
-DROP DATABASE IF EXISTS Bamazon_db;
+DROP DATABASE IF EXISTS bamazon;
 
-CREATE DATABASE Bamazon_db;
+CREATE database bamazon;
 
-USE Bamazon_db;
+USE bamazon;
 
 CREATE TABLE products(
-	id INT NOT NULL AUTO_INCREMENT,
-	ProductName VARCHAR(100) NOT NULL,
-	DepartmentName VARCHAR(100) NOT NULL,
-	Price DECIMAL(10,2) default 0,
-	StockQuantity INT default 0,
-	PRIMARY KEY(id)
+	item_id INT(4) NOT NULL,
+	product_name VARCHAR(100) NOT NULL,
+	department_name VARCHAR(100) NOT NULL,
+	price DECIMAL(10,2) NOT NULL,
+	stock_quantity INT(20) NOT NULL,
+	PRIMARY KEY (item_id)
 );
 
-INSERT INTO products(ProductName, DepartmentName, Price, StockQuantity) VALUES ('Brooks Launch 2', 'Running Shoes', 99, 12);
-INSERT INTO products(ProductName, DepartmentName, Price, StockQuantity) VALUES ('Adidas Supernova Glide 8', 'Running Shoes', 129.95, 20);
-INSERT INTO products(ProductName, DepartmentName, Price, StockQuantity) VALUES ('Mizuno Wave Rider 18', 'Running Shoes', 119.95, 10);
-INSERT INTO products(ProductName, DepartmentName, Price, StockQuantity) VALUES ('Nike LUNARGLIDE 8', 'Running Shoes', 119.95, 33);
-INSERT INTO products(ProductName, DepartmentName, Price, StockQuantity) VALUES ('Nike Men\'s Running Tee', 'Apparel', 70, 10);
-INSERT INTO products(ProductName, DepartmentName, Price, StockQuantity) VALUES ('Nike Men\'s Running Tank', 'Apparel', 45, 12);
-INSERT INTO products(ProductName, DepartmentName, Price, StockQuantity) VALUES ('Nike Women\'s Running Tee', 'Apparel', 75, 40);
-INSERT INTO products(ProductName, DepartmentName, Price, StockQuantity) VALUES ('Nike Women\'s Running Tank', 'Apparel', 50, 3);
-INSERT INTO products(ProductName, DepartmentName, Price, StockQuantity) VALUES ('Hydration Belt', 'Accessories', 55, 4);
-INSERT INTO products(ProductName, DepartmentName, Price, StockQuantity) VALUES ('Headlamp', 'Accessories', 25, 20);
-INSERT INTO products(ProductName, DepartmentName, Price, StockQuantity) VALUES ('GPS Watch', 'Electronics', 299.99, 2);
+Select * FROM products;
 
-CREATE TABLE departments (
-	DepartmentId INT NOT NULL AUTO_INCREMENT,
-	DepartmentName VARCHAR(100) NOT NULL,
-	OverheadCost DECIMAL(10,2) NOT NULL,
-	TotalSales DECIMAL(10,2),
-	PRIMARY KEY(DepartmentId)
-);
-
-INSERT INTO departments(DepartmentName, OverheadCost) VALUES('Running Shoes', 500);
-INSERT INTO departments(DepartmentName, OverheadCost) VALUES('Apparel', 500);
-INSERT INTO departments(DepartmentName, OverheadCost) VALUES('Electronics', 500);
-INSERT INTO departments(DepartmentName, OverheadCost) VALUES('Accessories', 500);
+INSERT INTO products (item_id, product_name, department_name, price, stock_quantity) 
+VALUES (101, "cleets", "soccer", 79.99, 20),
+	   (212, "jerseys", "basketball", 99.99, 10),
+	   (313, "helmet", "football", 29.99, 5),
+	   (420, "sweater", "hockey", 129.99, 14),
+	   (504, "pants", "football", 39.99, 15),
+	   (619, "shorts", "soccer", 19.99, 19),
+	   (720, "gloves", "baseball", 49.99, 11),
+	   (808, "bats", "baseball", 69.99, 10),
+	   (913, "pucks", "hockey", 9.99, 19),
+	   (1009, "running shoes", "basketball", 89.99, 17)
