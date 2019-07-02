@@ -91,3 +91,21 @@ function placeOrder(){
 };
 
 
+//Allows the user to place a new order or end the connection
+function newOrder(){
+	inquirer.prompt([{
+		type: 'confirm',
+		name: 'choice',
+		message: 'Would you like to place another order?'
+	}]).then(function(answer){
+		if(answer.choice){
+			placeOrder();
+		}
+		else{
+			console.log('Thank you for shopping!');
+			connection.end();
+		}
+	})
+};
+
+
